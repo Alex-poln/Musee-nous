@@ -1,0 +1,16 @@
+MUSÉE DE NOUS – DEIN FOTOMUSEUM
+
+1. Node.js LTS (mindestens 22.12) installieren: https://nodejs.org/
+2. Den entpackten Ordner musee-nous in VS Code öffnen.
+3. Terminal öffnen, nacheinander ausführen:
+
+   npm install
+   npm run dev
+
+4. Den lokalen Link aus dem Terminal öffnen.
+5. „Demo-Ausstellung entdecken“ anklicken.
+
+Für eure eigenen Bilder: README.md öffnen.
+Dort stehen die Einrichtung von Supabase, die Fotopflege und GitHub Pages.
+Das komplette SQL liegt in supabase/setup.sql.
+Es müssen keine Codeschnipsel aus einem Chat zusammengesucht werden.
