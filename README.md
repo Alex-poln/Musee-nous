@@ -1,5 +1,14 @@
 # Musée de Nous
 
+## Version 2: ein ganzes Jahr im Museum
+
+Du startest im Louvre-inspirierten Außenhof. Gehe auf den leuchtenden Kreis vor der Pyramide, um die große Eingangshalle zu betreten. Von dort führen vier Richtungen in die Quartale Januar–März, April–Juni, Juli–September und Oktober–Dezember. In jedem Flügel liegen Themenräume. Leuchtende Bodenflächen wechseln den Bereich; der Museumsplan erlaubt direkte Sprünge. Die Architektur ist ein stilisierter eigener Nachbau, kein maßstabsgetreues Louvre-Modell.
+
+Die Demo enthält **320 Bildplätze**, 80 je Quartal. Beginn, Stadion, Mailand, Paris und Schweiz sind beispielhaft zugeordnet. Eure echten Bilder werden automatisch anhand von `taken_on` einem Quartal zugeordnet; `location` benennt die Mini-Ausstellung (z. B. Paris). Ohne Datum landet das Bild in Quartal 1, ohne Ortsangabe in „Unsere Erinnerungen“. Große Themen werden in Räume mit höchstens 12 Bildern aufgeteilt; Flügel zeigen je acht Türen pro Abschnitt. Die Reihenfolge innerhalb der Themen folgt `sort_order`.
+
+Beim Login lädt die App nur die Bildtexte und Metadaten seitenweise. Erst im Themenraum lädt sie maximal zwölf Fotos, mit zwei gleichzeitigen Downloads. Im Browser werden Vorschauen verkleinert, der Cache hält maximal 24 Fotos. Beim Raumwechsel werden die alten 3D-Geometrien und Texturen freigegeben. Originalfotos vor dem Upload trotzdem auf maximal 1600 Pixel verkleinern, damit der Download schnell bleibt. Hunderte Fotos sind strukturell unterstützt; die tatsächliche Leistung hängt vom Gerät und den Bildgrößen ab.
+
+
 Ein privates, begehbares Fotomuseum als Adventskalender-Geschenk. Louvre-inspirierte Galerie mit Glaspyramide, grünen Wänden, goldenen Rahmen und einem Ehrenplatz für euer Lieblingsfoto. Kein Nachbau des Louvre, keine externen Museumsfotos.
 
 ## 1. In zwei Minuten die Demo starten
@@ -18,7 +27,7 @@ npm run dev
 
 Zum Beenden im Terminal **Strg+C**. Zum erneuten Start nur `npm run dev` ausführen. `index.html` nicht per Doppelklick öffnen. Die ZIP enthält den Quellcode, nicht `node_modules`; die erste Installation braucht Internet.
 
-**Bedienung:** Handy: Joystick unten links zum Laufen, auf der Galerie wischen zum Umschauen, Foto antippen zum Öffnen. PC: WASD zum Laufen, mit gedrückter Maustaste umschauen; Pfeiltasten oben/unten laufen, links/rechts drehen. In der Fotoansicht kannst du weiterblättern. „Alle Erinnerungen“ funktioniert auch ohne 3D. Das Haus-Symbol bringt dich zum Eingang. Der Modus ist aus der Ich-Perspektive, ohne sichtbaren Avatar.
+**Bedienung:** Handy: Joystick unten links zum Laufen, auf der Galerie wischen zum Umschauen, Foto antippen zum Öffnen. PC: WASD zum Laufen, mit gedrückter Maustaste umschauen; Pfeiltasten oben/unten laufen, links/rechts drehen. In der Fotoansicht kannst du weiterblättern. „Museumsplan“ funktioniert auch ohne 3D. Das Haus-Symbol bringt dich zum Eingang. Der Modus ist aus der Ich-Perspektive, ohne sichtbaren Avatar.
 
 ## 2. Dein Supabase-Projekt einrichten
 
@@ -54,7 +63,7 @@ Am besten ein **neues, separates Supabase-Projekt** verwenden. Das SQL ist auf e
 
 `id` und `created_at` automatisch erzeugen lassen. Bei einem Unterordner heißt `image_path` beispielsweise `sommer/strand.jpg`.
 
-Das **letzte Foto nach sort_order** hängt als Lieblingskunstwerk an der Stirnwand. Verwende eindeutige Reihenfolgen wie 10, 20, 30. Die Galerie wächst mit der Anzahl der Bilder. Für das erste Geschenk sind 12–24 Fotos ein guter Umfang; für sehr viele Bilder steigt der Speicherbedarf, weil die App die Bilder vor dem Eintritt lädt.
+Verwende eindeutige Reihenfolgen wie 10, 20, 30. Themenausstellungen und zusätzliche Räume wachsen automatisch mit der Anzahl eurer Bilder. Es wird jeweils nur der aktuelle Raum geladen.
 
 Alternativ enthält `supabase/content-example.sql` zwei Beispielzeilen. Erst passende Bilder hochladen, Texte anpassen und dann das SQL ausführen. Persönliche Texte danach nicht versehentlich committen: am einfachsten direkt im Dashboard pflegen.
 
@@ -146,7 +155,7 @@ Vor dem Geschenk diese kurze Abnahme durchführen:
 | GitHub-Workflow scheitert beim Konfigurationsschritt | Beide Repository Variables setzen, nicht nur die lokale .env |
 | Live-Seite funktioniert lokal, aber nicht online | Pages auf GitHub Actions stellen, letzten Workflow prüfen |
 | 3D langsam | Kleinere Bilder, weniger Fotos, anderen aktuellen Browser verwenden |
-| Schwarze/fehlende 3D-Ansicht | WebGL/Hardwarebeschleunigung prüfen; über „Alle Erinnerungen“ ansehen |
+| Schwarze/fehlende 3D-Ansicht | WebGL/Hardwarebeschleunigung prüfen; über „Museumsplan“ ansehen |
 
 ## Technische Referenzen
 
