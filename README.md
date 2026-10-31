@@ -130,7 +130,7 @@ npm run build
 npm run preview
 ```
 
-Bei der Erstellung wurden automatisierte Tests für Galeriegrößen (0 bis 100 Bilder), eindeutige Bildplätze und die Laufgrenzen sowie der Produktionsbuild ausgeführt. Die bereitgestellte Browser-Vorschauumgebung war nicht verfügbar; Optik, Touch-Steuerung und 3D sind deshalb hier nicht im Browser verifiziert. Es waren auch kein echtes Supabase-Projekt und keine Zugangsdaten vorhanden: SQL, RLS und Login sind vorbereitet, aber noch nicht gegen deine Instanz getestet. Das Projekt wird im Repository Alex-poln/Musee-nous verwaltet; den aktuellen Veröffentlichungsstatus zeigt der Actions-Tab.
+Bei der Erstellung wurden automatisierte Tests für Galeriegrößen (0 bis 100 Bilder), eindeutige Bildplätze und die Laufgrenzen sowie der Produktionsbuild ausgeführt. Der Live-Museumsplan wurde im Browser geprüft. Der Testbrowser hat WebGL deaktiviert; die 3D-Ansicht und Touch-Bewegung konnten hier deshalb nicht visuell abgenommen werden. Die Quartals- und Raumaufteilung ist außerdem für 1.000 Bilddatensätze automatisiert geprüft. Es waren auch kein echtes Supabase-Projekt und keine Zugangsdaten vorhanden: SQL, RLS und Login sind vorbereitet, aber noch nicht gegen deine Instanz getestet. Das Projekt wird im Repository Alex-poln/Musee-nous verwaltet; den aktuellen Veröffentlichungsstatus zeigt der Actions-Tab.
 
 Vor dem Geschenk diese kurze Abnahme durchführen:
 
