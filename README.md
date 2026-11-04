@@ -27,7 +27,7 @@ npm run dev
 
 Zum Beenden im Terminal **Strg+C**. Zum erneuten Start nur `npm run dev` ausführen. `index.html` nicht per Doppelklick öffnen. Die ZIP enthält den Quellcode, nicht `node_modules`; die erste Installation braucht Internet.
 
-**Bedienung:** Handy: Joystick unten links zum Laufen, auf der Galerie wischen zum Umschauen, Foto antippen zum Öffnen. PC: WASD zum Laufen, mit gedrückter Maustaste umschauen; Pfeiltasten oben/unten laufen, links/rechts drehen. In der Fotoansicht kannst du weiterblättern. „Museumsplan“ funktioniert auch ohne 3D. Das Haus-Symbol bringt dich zum Eingang. Der Modus ist aus der Ich-Perspektive, ohne sichtbaren Avatar.
+**Bedienung:** Standardmäßig läuft die persönliche Figur in Third Person durch das Museum. „Kamera: POV“ wechselt jederzeit in die Ich-Perspektive; beim Öffnen einer Erinnerung verschwindet die Figur automatisch. Handy: Joystick unten links zum Laufen, auf der Galerie wischen zum Umschauen, Foto antippen zum Öffnen. PC: WASD zum Laufen, mit gedrückter Maustaste umschauen; Pfeiltasten oben/unten laufen, links/rechts drehen. In der Fotoansicht kannst du weiterblättern. „Museumsplan“ funktioniert auch ohne 3D. Das Haus-Symbol bringt dich zum Eingang.
 
 ## 2. Adminzugang und Einrichtung
 
