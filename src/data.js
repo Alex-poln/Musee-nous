@@ -8,9 +8,9 @@ const topics=[['Beginn','Stadion'],['Mailand','Paris'],['Schweiz','Sommertage'],
 export const demo=Array.from({length:320},(_,i)=>{const q=Math.floor(i/80),topic=topics[q][Math.floor((i%80)/40)];return {id:`demo-${i}`,title:`${topic} · Moment ${i%40+1}`,caption:'Ein Platz für eure Erinnerung. Die Quartals- und Themenzuordnung dieser Demo ist ein Beispiel und lässt sich später über Datum und Ort eurer Fotos bestimmen.',location:topic,taken_on:`2026-${String(q*3+1).padStart(2,'0')}-${String(i%28+1).padStart(2,'0')}`,sort_order:i};});
 export async function loadMemories(){
  const rows=[];
- for(let offset=0;;offset+=500){const {data,error}=await client.from('memories').select('id,title,caption,location,taken_on,image_path,sort_order').order('sort_order').order('id').range(offset,offset+499);
+ for(let offset=0;;offset+=500){const {data,error}=await client.from('memories').select('id,title,caption,location,taken_on,image_path,sort_order,exhibition_id,frame_index').order('sort_order').order('id').range(offset,offset+499);
  if(error)throw new Error('Ausstellung nicht erreichbar. Bitte Anmeldung und Freigabe prüfen.');rows.push(...data);if(data.length<500)break;}
- if(!rows.length)throw new Error('Noch keine freigegebenen Erinnerungen vorhanden.');return rows;
+ return rows;
 }
 // Nur Metadaten beim Eintritt. Maximal 24 dekodierte Vorschaubilder im Cache.
 const cache=new Map(),pending=new Map();let generation=0;

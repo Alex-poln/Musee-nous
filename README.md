@@ -29,43 +29,17 @@ Zum Beenden im Terminal **Strg+C**. Zum erneuten Start nur `npm run dev` ausfüh
 
 **Bedienung:** Handy: Joystick unten links zum Laufen, auf der Galerie wischen zum Umschauen, Foto antippen zum Öffnen. PC: WASD zum Laufen, mit gedrückter Maustaste umschauen; Pfeiltasten oben/unten laufen, links/rechts drehen. In der Fotoansicht kannst du weiterblättern. „Museumsplan“ funktioniert auch ohne 3D. Das Haus-Symbol bringt dich zum Eingang. Der Modus ist aus der Ich-Perspektive, ohne sichtbaren Avatar.
 
-## 2. Dein Supabase-Projekt einrichten
+## 2. Adminzugang und Einrichtung
 
-Am besten ein **neues, separates Supabase-Projekt** verwenden. Das SQL ist auf ein neues Projekt ausgelegt; in einem bestehenden Projekt könnten andere, weiter gefasste Storage-Policies zusätzlichen Zugriff erlauben.
+Das bestehende Projekt ist eingerichtet. Auf der Website „Zugang anlegen“ wählen, die freigegebene E-Mail und ein eigenes Passwort eingeben, E-Mail bestätigen und anmelden. Registrierungen ohne private Einladung werden abgewiesen. Das Passwort niemals ins Repository schreiben.
 
-1. Unter https://supabase.com/dashboard ein Projekt erstellen. Das Datenbankpasswort bleibt bei dir; es wird für diese App nicht benötigt.
-2. **SQL Editor → New query** öffnen. Den vollständigen Inhalt von `supabase/setup.sql` einfügen und **Run** klicken.
-3. Das erstellt automatisch:
-   - `museum_members`: die erlaubten Nutzer-IDs;
-   - `memories`: Titel, Bildtext, Ort, Datum und Bildpfad;
-   - privaten Storage-Bucket `memories`;
-   - RLS-Regeln: nur freigegebene, angemeldete Nutzer dürfen lesen. Besucher dürfen nichts hochladen, ändern oder löschen.
-4. Unter **Authentication → Providers / Sign In → Email** E-Mail/Passwort aktiv lassen. **Allow new users to sign up** deaktivieren (je nach Dashboard unter Authentication Settings / User Signups).
-5. Unter **Authentication → Users → Add user → Create new user** einen Nutzer für deine Freundin mit E-Mail und starkem Passwort anlegen. **Auto Confirm User** aktivieren. Optional einen zweiten Nutzer für dich anlegen. Nicht „Invite user“ wählen, wenn du keine Einladungsmail senden möchtest.
-6. Die UUID des erstellten Nutzers kopieren. Unter **Table Editor → museum_members → Insert row** in `user_id` einfügen. Für deinen eigenen Nutzer wiederholen. Keine weiteren Werte erforderlich.
+Für ein neues Supabase-Projekt zuerst `supabase/setup.sql`, danach die beiden Dateien unter `supabase/migrations/` in zeitlicher Reihenfolge ausführen. E-Mail/Passwort und Registrierungen aktiviert lassen; der Datenbanktrigger beschränkt neue Konten auf `museum_invitations`. Dort ausschließlich im Dashboard die gewünschte E-Mail in Kleinbuchstaben und die Rolle `admin` oder `viewer` eintragen. Nach Bestätigung wird die Einladung verbraucht und die Mitgliedschaft angelegt. Unter Authentication URL Configuration die eigene Website als Site URL setzen.
 
-**Wichtig:** Ein Auth-Nutzer allein bekommt noch keinen Zugriff. Erst der Eintrag in `museum_members` schaltet ihn frei. Deine Freundin braucht keinen Supabase-Dashboard-Account, nur den von dir angelegten App-Login.
+## 3. Museum direkt gestalten
 
-## 3. Fotos und Texte hinzufügen
+Nach Admin-Anmeldung „Museum gestalten“ öffnen. Alle vier Gänge lassen sich benennen. Themenräume wie Anfang, Stadion, Mailand, Paris und Schweiz einem Quartal zuordnen, umbenennen oder verschieben. Rahmen in der 3D-Ansicht oder der Rahmenübersicht antippen, Foto auswählen, Titel und Text schreiben und speichern. Nach zwölf belegten Rahmen entsteht der nächste Raum. Bestehende Bilder können ersetzt werden; die frühere Datei bleibt privat als Sicherheitskopie gespeichert.
 
-1. Fotos lokal auf etwa **1200–1600 Pixel längste Kante** verkleinern. JPG oder WebP empfohlen, idealerweise etwa 150–400 KB. HEIC vorher in JPG konvertieren. Der Bucket akzeptiert JPG, PNG und WebP bis 5 MiB pro Datei.
-2. Unter **Storage → memories** hochladen. Bucket **privat lassen**. Einfache Namen verwenden, z. B. `paris.jpg`, `strand.jpg`. Eure Bilder niemals in das GitHub-Repo legen.
-3. Unter **Table Editor → memories → Insert row** pro Foto eintragen:
-
-| Feld | Beispiel | Bedeutung |
-| --- | --- | --- |
-| title | Unser Tag in Paris | Titel am Bild |
-| caption | Mit dir würde ich mich hier immer wieder verlaufen. | Persönliche Erinnerung |
-| location | Paris | Ortsangabe |
-| taken_on | 2025-06-01 | Optionales Datum, sonst leer lassen |
-| image_path | paris.jpg | Exakter Pfad im Bucket, keine URL |
-| sort_order | 10 | Aufsteigende Reihenfolge |
-
-`id` und `created_at` automatisch erzeugen lassen. Bei einem Unterordner heißt `image_path` beispielsweise `sommer/strand.jpg`.
-
-Verwende eindeutige Reihenfolgen wie 10, 20, 30. Themenausstellungen und zusätzliche Räume wachsen automatisch mit der Anzahl eurer Bilder. Es wird jeweils nur der aktuelle Raum geladen.
-
-Alternativ enthält `supabase/content-example.sql` zwei Beispielzeilen. Erst passende Bilder hochladen, Texte anpassen und dann das SQL ausführen. Persönliche Texte danach nicht versehentlich committen: am einfachsten direkt im Dashboard pflegen.
+Uploads werden im Browser auf maximal 1600 Pixel verkleinert. Unterstützt der Browser ein HEIC-Original nicht, als JPEG exportieren. Fotos und persönliche Texte bleiben in Supabase, nicht in GitHub. Nur Admins dürfen Inhalte verändern. Die Demo zeigt weiterhin unabhängige Beispielmotive.
 
 ## 4. App mit Supabase verbinden
 
@@ -115,12 +89,12 @@ Den fertigen GitHub-Pages-Link in einen QR-Code umwandeln (z. B. mit der QR-Funk
 
 ## Schutzmodell
 
-- Keine Registrierung in der Website, nur Login für angelegte Accounts.
+- Registrierung ausschließlich für privat hinterlegte Einladungen; Rechte erst nach E-Mail-Bestätigung.
 - RLS schützt Datenbanktexte und den privaten Storage-Bucket zusätzlich mit einer Mitgliederliste.
 - Bilder werden mit dem angemeldeten Nutzer heruntergeladen und als lokale Blob-URLs angezeigt. Es werden keine öffentlichen Bild-URLs oder signierten Freigabelinks erzeugt.
 - Die Sitzung wird nicht dauerhaft in localStorage gespeichert. Nach Neuladen ist eine erneute Anmeldung nötig. „Abmelden“ entfernt Galerie und Blob-URLs aus der App.
 - Bereits heruntergeladene Fotos kann eine berechtigte Person speichern oder fotografieren. Entzug der Mitgliedschaft verhindert neue Abrufe, löscht aber keine bereits geladenen Inhalte auf fremden Geräten.
-- Es gibt keinen Upload-Adminbereich in der Website. Verwaltung erfolgt bewusst über dein Supabase-Dashboard.
+- Adminverwaltung in der Website; Rollen werden serverseitig geprüft.
 
 ## Tests und ehrlicher Prüfstand
 
@@ -130,7 +104,7 @@ npm run build
 npm run preview
 ```
 
-Bei der Erstellung wurden automatisierte Tests für Galeriegrößen (0 bis 100 Bilder), eindeutige Bildplätze und die Laufgrenzen sowie der Produktionsbuild ausgeführt. Der Live-Museumsplan wurde im Browser geprüft. Der Testbrowser hat WebGL deaktiviert; die 3D-Ansicht und Touch-Bewegung konnten hier deshalb nicht visuell abgenommen werden. Die Quartals- und Raumaufteilung ist außerdem für 1.000 Bilddatensätze automatisiert geprüft. Es waren auch kein echtes Supabase-Projekt und keine Zugangsdaten vorhanden: SQL, RLS und Login sind vorbereitet, aber noch nicht gegen deine Instanz getestet. Das Projekt wird im Repository Alex-poln/Musee-nous verwaltet; den aktuellen Veröffentlichungsstatus zeigt der Actions-Tab.
+Bei der Erstellung wurden automatisierte Tests für Galeriegrößen (0 bis 100 Bilder), eindeutige Bildplätze und die Laufgrenzen sowie der Produktionsbuild ausgeführt. Der Live-Museumsplan wurde im Browser geprüft. Der Testbrowser hat WebGL deaktiviert; die 3D-Ansicht und Touch-Bewegung konnten hier deshalb nicht visuell abgenommen werden. Die Quartals- und Raumaufteilung ist außerdem für 1.000 Bilddatensätze automatisiert geprüft. Die Datenbank ist eingerichtet. Der vollständige Login und Foto-Upload mit einem echten Konto muss nach dessen E-Mail-Bestätigung getestet werden. Das Projekt wird im Repository Alex-poln/Musee-nous verwaltet; den aktuellen Veröffentlichungsstatus zeigt der Actions-Tab.
 
 Vor dem Geschenk diese kurze Abnahme durchführen:
 
@@ -138,7 +112,7 @@ Vor dem Geschenk diese kurze Abnahme durchführen:
 - Erlaubter Nutzer: alle Fotos und Texte sichtbar.
 - Ohne Anmeldung: keine privaten Fotos oder Texte abrufbar.
 - Zusätzlicher Testnutzer **ohne** museum_members-Eintrag: Login kann gültig sein, aber Ausstellung muss gesperrt bleiben.
-- Storage-Bucket auf „Private“ und öffentliche Registrierung auf „Off“ kontrollieren.
+- Storage-Bucket auf „Private“ und Einladungsbeschränkung kontrollieren.
 - Abmelden, neu laden: wieder Login. Live-Link und QR-Code unabhängig vom lokalen Rechner testen.
 
 ## Häufige Probleme
