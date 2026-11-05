@@ -27,7 +27,7 @@ export function createMuseum(host,rows,onSelect,onPlace,editor={}){
  facade(0,-44,110,0);facade(-56,0,88,Math.PI/2);facade(56,0,88,-Math.PI/2);pyramid(0,0,-12,27,18);pyramid(-31,0,-15,9,6);pyramid(31,0,-15,9,6);
  const pool=mat('#224d60',{metalness:.5,roughness:.2});box(20,.04,13,pool,-29,.01,8);box(20,.04,13,pool,29,.01,8);
  for(let x=-45;x<=45;x+=9){box(.35,.8,.35,stone,x,.4,24);box(.45,.15,.45,mat('#ffe5a0',{emissive:'#ffce74',emissiveIntensity:2}),x,.85,24);}
- label('MUSÉE DE NOUS',0,22,-20,22);label('Un an. Quatre saisons. Notre histoire.',0,19.8,-20,18);portal('Das Museum betreten',0,7,{type:'hub'});camera.position.set(0,1.8,33);yaw=0;onPlace({title:'Der Louvre gehört uns.',subtitle:'COUR NAPOLÉON · UNTER FREIEM HIMMEL',detail:'Laufe auf die leuchtende Fläche vor der Pyramide.',zone:'outside'});}
+ label('UNSER LOUVRE',0,22,-20,22);label('Ein Jahr. Vier Jahreszeiten. Unsere Geschichte.',0,19.8,-20,18);portal('Das Museum betreten',0,7,{type:'hub'});camera.position.set(0,1.8,33);yaw=0;onPlace({title:'Unser Louvre.',subtitle:'COUR NAPOLÉON · UNTER FREIEM HIMMEL',detail:'Laufe auf die leuchtende Fläche vor der Pyramide.',zone:'outside'});}
  function hub(){roomBase(48,48,10,'#c5ad85',true);pyramid(0,10,0,47,23);const stone=mat('#cbb18c'),gold=mat('#9d875e');for(const x of [-18,18])for(const z of [-18,18]){box(1.5,10,1.5,stone,x,5,z);box(3,.5,3,gold,x,9.5,z);} // Freier zentraler Platz mit vier gleichwertigen Ausgängen.
  for(let i=0;i<14;i++){box(7,.24,1.1,stone,-11,1+i*.22,8+i*.8);box(.16,.8,1.1,gold,-14.5,1.6+i*.22,8+i*.8);}
  label('UN AN AVEC TOI',0,8,-18,16);label('Ein Jahr. Vier Flügel. Hunderte Erinnerungen.',0,6.5,-18,18);
