@@ -1,6 +1,11 @@
 import {client} from './data';
 import {config} from './config';
 import {fitImage,validatePhoto} from './editor-model';
+export async function createVisitor(values){
+ const {data,error}=await client.functions.invoke('create-visitor',{body:values});
+ if(error){let message;try{message=(await error.context.json()).error;}catch{}throw new Error(message||'Zugang konnte nicht angelegt werden. Bitte Anmeldung und Verbindung prüfen.');}
+ if(!data?.created)throw new Error(data?.error||'Zugang konnte nicht angelegt werden.');
+}
 export async function loadAccess(){const {data:{user},error}=await client.auth.getUser();if(error||!user)throw new Error('Bitte erneut anmelden.');const result=await client.from('museum_members').select('role').eq('user_id',user.id).maybeSingle();if(result.error)throw new Error('Zugriffsrechte konnten nicht geladen werden.');if(!result.data)throw new Error('Dein Konto ist noch nicht für das Museum freigegeben.');return result.data.role==='admin';}
 export async function loadStructure(){const [w,e]=await Promise.all([client.from('museum_wings').select('id,title').order('id'),client.from('museum_exhibitions').select('id,title,wing_id,sort_order').order('sort_order').order('id')]);if(w.error||e.error)throw new Error('Die Raumstruktur konnte nicht geladen werden.');return {wings:w.data,exhibitions:e.data};}
 export async function saveWing(id,title){title=title.trim();if(!title||title.length>80)throw new Error('Gangname: 1–80 Zeichen.');const {data,error}=await client.from('museum_wings').update({title}).eq('id',id).select('id').single();if(error||!data)throw new Error('Gang konnte nicht gespeichert werden. Bitte Adminrechte prüfen.');}

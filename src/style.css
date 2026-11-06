@@ -13,3 +13,14 @@
 .welcome-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:#10251f66;backdrop-filter:blur(2px) saturate(.75);opacity:0;transition:opacity .45s ease}.welcome-overlay.visible{opacity:1}.welcome-panel{width:min(650px,100%);padding:54px 58px 42px;border:1px solid #f4e6bd66;border-radius:5px;background:#142f2bd9;color:#fff9e8;box-shadow:0 35px 120px #06120e99;backdrop-filter:blur(20px);transform:translateY(20px) scale(.985);transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .25s}.welcome-overlay.visible .welcome-panel{transform:none}.welcome-panel.changing{opacity:0;transform:translateY(-12px)}.welcome-panel>p{margin:0 0 18px;color:#d9bb7a;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}.welcome-panel h2{margin:0;font:400 clamp(42px,7vw,66px)/1.05 'Italiana',Georgia,serif;color:#fff9e8}.welcome-rule{width:52px;height:1px;margin:29px 0;background:#d4b674}.welcome-copy{max-width:520px;min-height:85px;font:400 18px/1.75 Georgia,serif;color:#f4ecd8}.welcome-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:35px}.welcome-footer button{border:1px solid #e0c78d88;border-radius:99px;background:#f4ead2;color:#213b33;padding:14px 21px;font-size:12px;font-weight:700}.welcome-dots{display:flex;gap:7px}.welcome-dots i{width:7px;height:7px;border:1px solid #dbc58e;border-radius:50%;transition:.25s}.welcome-dots i.active{width:24px;border-radius:9px;background:#dbc58e}
 @media(max-width:600px){.login-page{padding-top:135px}.login-card-content{padding:82px 23px 27px}.squirrel-wrap{top:-126px;width:215px}.login-card h1{font-size:34px}.welcome-panel{padding:38px 28px 30px}.welcome-copy{font-size:16px;min-height:105px}.welcome-footer{align-items:flex-end}.welcome-footer button{max-width:190px}.login-pyramid{width:120vw;height:75vw;bottom:27%}}
 @media(prefers-reduced-motion:reduce){.welcome-overlay,.welcome-panel,.squirrel-paw,#squirrel-pupils{transition-duration:.01ms!important}}
+/* Multi-photo uploads keep controls usable on phones. */
+.bulk-actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.bulk-list{display:grid;gap:12px;margin:18px 0;max-height:48vh;overflow:auto}
+.bulk-item{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center;padding:12px;border:1px solid #b99c6540;border-radius:12px}
+.bulk-item img{width:72px;height:80px;object-fit:cover;border-radius:6px;background:#ded7c7}
+.bulk-item label{margin:0}.bulk-item input{width:100%;min-width:0}
+.bulk-item small{display:block;margin-top:6px;overflow-wrap:anywhere}
+.bulk-item[data-state=saved] small{color:#2a6d4e}.bulk-item[data-state=failed] small{color:#a33728}
+.admin-body progress{display:block;width:100%;height:14px;accent-color:#31564c}
+.admin-body progress[hidden]{display:none}
+.admin-room-list>div{flex-wrap:wrap}

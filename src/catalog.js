@@ -13,7 +13,7 @@ export function catalog(rows,structure={wings:[],exhibitions:[]},options={}){ret
    // Legacy/extern importierte Zeilen ohne Platz bekommen den nächsten freien Rahmen.
    for(const {r,index} of placed.filter(v=>Number.isInteger(v.r.frame_index)))assigned.set(r.frame_index,index);
    for(const {r,index} of placed.filter(v=>!Number.isInteger(v.r.frame_index))){let next=0;while(assigned.has(next))next++;assigned.set(next,index);}
-   const max=Math.max(-1,...assigned.keys()),pages=Math.max(1,Math.ceil((max+1)/ROOM_SIZE)+(options.admin&&(max+1)%ROOM_SIZE===0&&max>=0?1:0));
+   const max=Math.max(-1,...assigned.keys()),pages=Math.max(1,Math.ceil((max+1)/ROOM_SIZE));
    for(let p=0;p<pages;p++){const slots=Array.from({length:ROOM_SIZE},(_,i)=>({index:assigned.get(p*ROOM_SIZE+i)??null,frameIndex:p*ROOM_SIZE+i,exhibitionId:ex.id}));rooms.push({id:`${ex.id}-${p}`,exhibitionId:ex.id,title:ex.title,part:p+1,parts:pages,slots,indices:slots.filter(s=>s.index!==null).map(s=>s.index)});}
  }
  const groups=new Map();rows.forEach((r,index)=>{if(r.exhibition_id||quarterOf(r)!==q.id)return;const topic=r.location?.trim()||'Unsere Erinnerungen';if(!groups.has(topic))groups.set(topic,[]);groups.get(topic).push(index);});

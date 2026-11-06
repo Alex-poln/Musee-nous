@@ -31,13 +31,13 @@ Zum Beenden im Terminal **Strg+C**. Zum erneuten Start nur `npm run dev` ausfüh
 
 ## 2. Adminzugang und Einrichtung
 
-Das bestehende Projekt ist eingerichtet. Auf der Website „Zugang anlegen“ wählen, die freigegebene E-Mail und ein eigenes Passwort eingeben, E-Mail bestätigen und anmelden. Registrierungen ohne private Einladung werden abgewiesen. Das Passwort niemals ins Repository schreiben.
+Das bestehende Projekt ist eingerichtet. Als Admin anmelden und unter „Museum gestalten → Besucherzugang einrichten“ die privat freigegebene E-Mail und ein Passwort mit mindestens zwölf Zeichen eingeben. Der Besucher erhält ausschließlich Leserechte und kann sich sofort anmelden. Es wird keine Bestätigungsmail gesendet. Die Edge Function `create-visitor` prüft die authentifizierte Admin-Mitgliedschaft und die serverseitige Viewer-Einladung; sie legt keine Admins an und setzt keine bestehenden Passwörter zurück. Das Passwort persönlich weitergeben und niemals ins Repository schreiben.
 
-Für ein neues Supabase-Projekt zuerst `supabase/setup.sql`, danach die beiden Dateien unter `supabase/migrations/` in zeitlicher Reihenfolge ausführen. E-Mail/Passwort und Registrierungen aktiviert lassen; der Datenbanktrigger beschränkt neue Konten auf `museum_invitations`. Dort ausschließlich im Dashboard die gewünschte E-Mail in Kleinbuchstaben und die Rolle `admin` oder `viewer` eintragen. Nach Bestätigung wird die Einladung verbraucht und die Mitgliedschaft angelegt. Unter Authentication URL Configuration die eigene Website als Site URL setzen.
+Für ein neues Supabase-Projekt zuerst `supabase/setup.sql`, danach alle Dateien unter `supabase/migrations/` in zeitlicher Reihenfolge ausführen. E-Mail/Passwort und Registrierungen aktiviert lassen; der Datenbanktrigger beschränkt neue Konten auf `museum_invitations`. Dort ausschließlich im Dashboard die gewünschte E-Mail in Kleinbuchstaben und die Rolle `admin` oder `viewer` eintragen. Nach Bestätigung wird die Einladung verbraucht und die Mitgliedschaft angelegt. Die Edge Function unter `supabase/functions/create-visitor/index.ts` mit aktivierter JWT-Prüfung veröffentlichen; die serverseitigen Supabase-Umgebungsvariablen werden von der Plattform bereitgestellt. Unter Authentication URL Configuration die eigene Website als Site URL setzen.
 
 ## 3. Museum direkt gestalten
 
-Nach Admin-Anmeldung „Museum gestalten“ öffnen. Alle vier Gänge lassen sich benennen. Themenräume wie Anfang, Stadion, Mailand, Paris und Schweiz einem Quartal zuordnen, umbenennen oder verschieben. Rahmen in der 3D-Ansicht oder der Rahmenübersicht antippen, Foto auswählen, Titel und Text schreiben und speichern. Nach zwölf belegten Rahmen entsteht der nächste Raum. Bestehende Bilder können ersetzt werden; die frühere Datei bleibt privat als Sicherheitskopie gespeichert.
+Nach Admin-Anmeldung „Museum gestalten“ öffnen. Alle vier Gänge lassen sich benennen. Themenräume wie Anfang, Stadion, Mailand, Paris und Schweiz einem Quartal zuordnen, umbenennen oder verschieben. Rahmen in der 3D-Ansicht oder der Rahmenübersicht antippen, Foto auswählen, Titel und Text schreiben und speichern. Ein weiterer Raum entsteht erst mit dem 13., 25. usw. Foto; bei genau zwölf Bildern erscheint kein leerer Folgeraum. Über „Mehrere Bilder hochladen“ im Themenraum können beliebig viele Fotos auf einmal ausgewählt werden. Freie Plätze werden zuerst gefüllt. Titel sind optional; Dateinamen werden nie als Titel übernommen. Fehlgeschlagene Bilder lassen sich wiederholen, erfolgreich gespeicherte werden dabei übersprungen. Pausieren beendet zuerst das laufende Bild. Nach „Fertig“ wird das Museum aktualisiert. Bestehende Bilder können ersetzt werden; die frühere Datei bleibt privat als Sicherheitskopie gespeichert.
 
 Uploads werden im Browser auf maximal 1600 Pixel verkleinert. Unterstützt der Browser ein HEIC-Original nicht, als JPEG exportieren. Fotos und persönliche Texte bleiben in Supabase, nicht in GitHub. Nur Admins dürfen Inhalte verändern. Die Demo zeigt weiterhin unabhängige Beispielmotive.
 
@@ -89,7 +89,7 @@ Den fertigen GitHub-Pages-Link in einen QR-Code umwandeln (z. B. mit der QR-Funk
 
 ## Schutzmodell
 
-- Registrierung ausschließlich für privat hinterlegte Einladungen; Rechte erst nach E-Mail-Bestätigung.
+- Besucher werden ausschließlich von einem angemeldeten Admin für privat hinterlegte Viewer-Einladungen angelegt. Die E-Mail wird bei der serverseitigen Kontoanlage bestätigt; keine Bestätigungsmail oder zweite Anmeldung nötig.
 - RLS schützt Datenbanktexte und den privaten Storage-Bucket zusätzlich mit einer Mitgliederliste.
 - Bilder werden mit dem angemeldeten Nutzer heruntergeladen und als lokale Blob-URLs angezeigt. Es werden keine öffentlichen Bild-URLs oder signierten Freigabelinks erzeugt.
 - Die Sitzung wird nicht dauerhaft in localStorage gespeichert. Nach Neuladen ist eine erneute Anmeldung nötig. „Abmelden“ entfernt Galerie und Blob-URLs aus der App.
