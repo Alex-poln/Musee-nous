@@ -16,7 +16,8 @@ Deno.serve(async req=>{
  if(!email||typeof body.password!=='string'||body.password.length<12||body.password.length>200)return reply({error:'Bitte E-Mail und ein Passwort mit mindestens 12 Zeichen eingeben.'},400);
  const invitation=await client.from('museum_invitations').select('role').eq('email',email).maybeSingle();
  if(invitation.error||invitation.data?.role!=='viewer')return reply({error:'Diese E-Mail ist nicht als neuer Besucherzugang freigegeben oder der Zugang besteht bereits.'},400);
- const {data,error}=await client.auth.admin.createUser({email,password:body.password,email_confirm:true});
+ // App metadata can only be set by the Auth admin API, not public signUp.
+ const {data,error}=await client.auth.admin.createUser({email,password:body.password,email_confirm:true,app_metadata:{museum_provisioned:true}});
  if(error)return reply({error:'Zugang konnte nicht angelegt werden. Möglicherweise besteht das Konto bereits; bitte Passwort prüfen.'},400);
  const access=await client.from('museum_members').select('role').eq('user_id',data.user.id).single();
  if(access.error||access.data.role!=='viewer')return reply({error:'Konto angelegt, aber Besucherfreigabe konnte nicht bestätigt werden.'},500);

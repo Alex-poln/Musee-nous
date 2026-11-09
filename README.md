@@ -1,5 +1,11 @@
 # Unser Louvre
 
+## Zugriffsschutz
+
+Öffentliche Selbstregistrierung wird in der Datenbank abgewiesen, auch für eingeladene E-Mail-Adressen. Neue Konten benötigen eine bestätigte E-Mail und das nur über die Auth-Admin-API setzbare `app_metadata.museum_provisioned=true`. Die geschützte Funktion `create-visitor` setzt diese Markierung erst nach Prüfung des angemeldeten Admins und einer privaten Viewer-Einladung. Bereits bestehende Konten bleiben gültig. Beim Bootstrap eines neuen Projekts muss auch der erste Admin serverseitig mit dieser Markierung angelegt werden.
+
+Die Website beschränkt nachgeladene Skripte und Verbindungen über eine Content Security Policy und rendert keine Oberfläche innerhalb fremder Frames. Private Fotos bleiben ausschließlich im privaten Supabase-Bucket. Berechtigte Mitglieder dürfen auch dort verbleibende ältere Fotoversionen sehen; das ist in diesem Museum beabsichtigt.
+
 ## Version 2: ein ganzes Jahr im Museum
 
 Du startest im Louvre-inspirierten Außenhof. Gehe auf den leuchtenden Kreis vor der Pyramide, um die große Eingangshalle zu betreten. Von dort führen vier Richtungen in die Quartale Januar–März, April–Juni, Juli–September und Oktober–Dezember. In jedem Flügel liegen Themenräume. Leuchtende Bodenflächen wechseln den Bereich; der Museumsplan erlaubt direkte Sprünge. Die Architektur ist ein stilisierter eigener Nachbau, kein maßstabsgetreues Louvre-Modell.

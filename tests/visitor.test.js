@@ -13,5 +13,5 @@ test('Visitor provisioning refuses missing/invalid sessions, viewers and uninvit
  for(const [options,token,status] of [[{},'',401],[{valid:false},'invalid',401],[{role:'viewer'},'valid',403],[{invitation:null},'valid',400],[{invitation:'admin'},'valid',400]]){const e=endpoint(options);assert.equal((await e.request(token)).status,status);assert.equal(e.calls.length,0);}
 });
 test('An admin creates only an invited visitor with email already confirmed',async()=>{
- const e=endpoint();assert.equal((await e.request()).status,200);assert.equal(e.calls.length,1);assert.equal(e.calls[0].email_confirm,true);assert.equal(e.calls[0].email,'guest@example.com');
+ const e=endpoint();assert.equal((await e.request()).status,200);assert.equal(e.calls.length,1);assert.equal(e.calls[0].email_confirm,true);assert.equal(e.calls[0].app_metadata.museum_provisioned,true);assert.equal(e.calls[0].email,'guest@example.com');
 });

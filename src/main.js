@@ -5,6 +5,8 @@ import {catalog} from './catalog';
 import {loadAccess,loadStructure} from './editor-api';
 import {createAdmin} from './admin';
 import {squirrel} from './squirrel';
+// The app renders nothing when embedded in an unrelated page.
+if(window.top!==window.self){document.documentElement.replaceChildren();throw new Error('Unser Louvre kann nur direkt geöffnet werden.');}
 const app=document.querySelector('#app');
 let museum=null,rows=[],structure={wings:[],exhibitions:[]},isAdmin=false,isDemo=false,active=0,photoRequest=0,sceneVersion=0,loading=false;
 let loginAbort=null;
