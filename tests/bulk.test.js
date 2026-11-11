@@ -1,11 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freeFrames} from '../src/editor-model.js';
-import {catalog} from '../src/catalog.js';
+import {catalog,framePage} from '../src/catalog.js';
 import {uploadBatch} from '../src/bulk-upload.js';
 const structure={exhibitions:[{id:'paris',title:'Paris',wing_id:1}]};
-test('12, 24 and 36 photos never create an empty next room',()=>{
- for(const n of [0,1,12,13,24,25,36]){const rows=Array.from({length:n},(_,i)=>({exhibition_id:'paris',frame_index:i}));for(const admin of [true,false])assert.equal(catalog(rows,structure,{admin})[0].rooms.length,Math.max(1,Math.ceil(n/12)));}
+test('Die Rahmenübersicht blättert weiter, die Ausstellung bleibt ein Gang',()=>{
+ for(const n of [0,1,12,13,24,25,36,100]){
+   const rows=Array.from({length:n},(_,i)=>({exhibition_id:'paris',frame_index:i}));
+   const {rooms}=catalog(rows,structure)[0];
+   assert.equal(rooms.length,1);
+   assert.equal(rooms[0].slots.length,n);
+   assert.equal(framePage(rows,'paris',0).pages,Math.max(1,Math.ceil(n/12)));
+ }
 });
 test('Bulk allocation fills holes, respects other rooms and reserves legacy positions',()=>{
  const rows=[{exhibition_id:'paris',frame_index:0},{exhibition_id:'paris',frame_index:2},{exhibition_id:'paris',frame_index:null},{exhibition_id:'milan',frame_index:3}];

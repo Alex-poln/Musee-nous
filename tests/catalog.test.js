@@ -1,5 +1,13 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {catalog,quarterOf,ROOM_SIZE} from '../src/catalog.js';
+import {catalog,quarterOf} from '../src/catalog.js';
 test('Alle zwölf Monate werden dem richtigen Quartal zugeordnet',()=>{for(let m=1;m<=12;m++)assert.equal(quarterOf({taken_on:`2026-${String(m).padStart(2,'0')}-01`}),Math.ceil(m/3));assert.equal(quarterOf({}),1);});
-test('1000 Fotos landen genau einmal in Räumen mit maximal zwölf Fotos',()=>{const rows=Array.from({length:1000},(_,i)=>({taken_on:`2026-${String(i%12+1).padStart(2,'0')}-01`,location:['Paris','Mailand','Schweiz'][i%3]}));const wings=catalog(rows);const indices=wings.flatMap(q=>q.rooms.flatMap(r=>{assert.ok(r.indices.length<=ROOM_SIZE);assert.ok(r.indices.length>0);return r.indices;}));assert.equal(indices.length,1000);assert.equal(new Set(indices).size,1000);assert.equal(wings.length,4);});
+test('1000 ältere Fotos landen genau einmal im Gang ihres Themas und Quartals',()=>{
+ const rows=Array.from({length:1000},(_,i)=>({taken_on:`2026-${String(i%12+1).padStart(2,'0')}-01`,location:['Paris','Mailand','Schweiz'][i%3]}));
+ const wings=catalog(rows);
+ for (const wing of wings) assert.equal(wing.rooms.length, 3);
+ const indices=wings.flatMap(q=>q.rooms.flatMap(r=>r.indices));
+ assert.equal(indices.length,1000);
+ assert.equal(new Set(indices).size,1000);
+ assert.equal(wings.length,4);
+});
 test('Themen bleiben innerhalb des Quartals getrennt und Räume sind stabil',()=>{const rows=[{location:'Paris',taken_on:'2026-04-01'},{location:'Mailand',taken_on:'2026-04-02'},{location:'Paris',taken_on:'2026-05-03'}];assert.deepEqual(catalog(rows)[1].rooms.map(r=>r.indices),[[0,2],[1]]);assert.equal(catalog([]).length,4);});

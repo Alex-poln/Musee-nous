@@ -6,17 +6,49 @@ export const quarters = [
 ];
 export const ROOM_SIZE=12;
 export function quarterOf(row){const month=Number(String(row.taken_on??'').slice(5,7));return month>=1&&month<=12?Math.ceil(month/3):1;}
-export function catalog(rows,structure={wings:[],exhibitions:[]},options={}){return quarters.map(defaultWing=>{
+function assignedFrames(placed) {
+ const assigned = new Map();
+ for (const {row, index} of placed) {
+   if (Number.isInteger(row.frame_index)) assigned.set(row.frame_index, index);
+ }
+ let next = 0;
+ // Older imports without a frame number occupy the first available positions.
+ for (const {row, index} of placed) {
+   if (Number.isInteger(row.frame_index)) continue;
+   while (assigned.has(next)) next++;
+   assigned.set(next++, index);
+ }
+ return assigned;
+}
+
+export function framePage(rows, exhibitionId, page) {
+ const placed = rows.flatMap((row, index) => row.exhibition_id === exhibitionId ? [{row, index}] : []);
+ const assigned = assignedFrames(placed);
+ const pages = Math.max(1, Math.ceil((Math.max(-1, ...assigned.keys()) + 1) / ROOM_SIZE));
+ const currentPage = Math.min(Math.max(page, 0), pages - 1);
+ const slots = Array.from({length: ROOM_SIZE}, (_, offset) => {
+   const frameIndex = currentPage * ROOM_SIZE + offset;
+   return {frameIndex, index: assigned.get(frameIndex) ?? null};
+ });
+ return {slots, pages, currentPage};
+}
+
+export function catalog(rows,structure={wings:[],exhibitions:[]}){
+ const byExhibition = new Map();
+ rows.forEach((row, index) => {
+   if (!row.exhibition_id) return;
+   if (!byExhibition.has(row.exhibition_id)) byExhibition.set(row.exhibition_id, []);
+   byExhibition.get(row.exhibition_id).push({row, index});
+ });
+ return quarters.map(defaultWing=>{
  const q={...defaultWing,...(structure.wings||[]).find(w=>w.id===defaultWing.id)};const rooms=[];
  for(const ex of (structure.exhibitions||[]).filter(e=>e.wing_id===q.id)){
-   const placed=rows.map((r,index)=>({r,index})).filter(v=>v.r.exhibition_id===ex.id);const assigned=new Map();
-   // Legacy/extern importierte Zeilen ohne Platz bekommen den nächsten freien Rahmen.
-   for(const {r,index} of placed.filter(v=>Number.isInteger(v.r.frame_index)))assigned.set(r.frame_index,index);
-   for(const {r,index} of placed.filter(v=>!Number.isInteger(v.r.frame_index))){let next=0;while(assigned.has(next))next++;assigned.set(next,index);}
-   const max=Math.max(-1,...assigned.keys()),pages=Math.max(1,Math.ceil((max+1)/ROOM_SIZE));
-   for(let p=0;p<pages;p++){const slots=Array.from({length:ROOM_SIZE},(_,i)=>({index:assigned.get(p*ROOM_SIZE+i)??null,frameIndex:p*ROOM_SIZE+i,exhibitionId:ex.id}));rooms.push({id:`${ex.id}-${p}`,exhibitionId:ex.id,title:ex.title,part:p+1,parts:pages,slots,indices:slots.filter(s=>s.index!==null).map(s=>s.index)});}
+   const slots = [...assignedFrames(byExhibition.get(ex.id) ?? [])]
+     .sort(([a], [b]) => a - b)
+     .map(([frameIndex, index]) => ({frameIndex, index, exhibitionId: ex.id}));
+   rooms.push({exhibitionId: ex.id, title: ex.title, slots, indices: slots.map(slot => slot.index)});
  }
  const groups=new Map();rows.forEach((r,index)=>{if(r.exhibition_id||quarterOf(r)!==q.id)return;const topic=r.location?.trim()||'Unsere Erinnerungen';if(!groups.has(topic))groups.set(topic,[]);groups.get(topic).push(index);});
- for(const [topic,indices] of groups){for(let i=0;i<indices.length;i+=ROOM_SIZE)rooms.push({id:`legacy-${q.id}-${rooms.length}`,title:topic,part:Math.floor(i/ROOM_SIZE)+1,parts:Math.ceil(indices.length/ROOM_SIZE),indices:indices.slice(i,i+ROOM_SIZE),slots:indices.slice(i,i+ROOM_SIZE).map(index=>({index}))});}
+ for (const [title, indices] of groups) rooms.push({title, indices, slots: indices.map(index => ({index}))});
  return {...q,rooms,count:rooms.reduce((s,r)=>s+r.indices.length,0)};
 });}
