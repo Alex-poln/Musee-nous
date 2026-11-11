@@ -12,18 +12,51 @@ export async function loadMemories(){
  if(error)throw new Error('Ausstellung nicht erreichbar. Bitte Anmeldung und Freigabe prüfen.');rows.push(...data);if(data.length<500)break;}
  return rows;
 }
-// Nur Metadaten beim Eintritt. Maximal 24 dekodierte Vorschaubilder im Cache.
-const cache=new Map(),pending=new Map();let generation=0;
-export async function getPhoto(row){
- if(!row.image_path)return null;
- if(cache.has(row.id)){const value=cache.get(row.id);cache.delete(row.id);cache.set(row.id,value);return value;}
- if(pending.has(row.id))return pending.get(row.id);
- const current=generation;
- const task=(async()=>{const {data,error}=await client.storage.from(config.bucket).download(row.image_path);if(error)throw new Error('Foto konnte nicht geladen werden.');
- let original=URL.createObjectURL(data);let preview;
- try{const bitmap=await createImageBitmap(data);const scale=Math.min(1,1200/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.85));if(!blob)throw new Error('Vorschau fehlgeschlagen');preview=URL.createObjectURL(blob);URL.revokeObjectURL(original);original=null;}catch{preview=original;}
- if(current!==generation){URL.revokeObjectURL(preview);throw new Error('Ausstellung geschlossen.');}
- cache.set(row.id,preview);while(cache.size>24){const id=cache.keys().next().value;URL.revokeObjectURL(cache.get(id));cache.delete(id);}return preview;})();
- pending.set(row.id,task);try{return await task;}finally{if(pending.get(row.id)===task)pending.delete(row.id);}
+// Keep compressed image files ready for the gallery without decoding them until needed.
+const CACHE_ITEMS = 72;
+const CACHE_BYTES = 48 * 1024 * 1024;
+const cache = new Map(), pending = new Map();
+let cachedBytes = 0, generation = 0;
+
+export async function getPhoto(row) {
+ const path = row.image_path;
+ if (!path) return null;
+ const cached = cache.get(path);
+ if (cached) {
+   cache.delete(path);
+   cache.set(path, cached);
+   return cached.url;
+ }
+ if (pending.has(path)) return pending.get(path);
+ const current = generation;
+ const task = (async () => {
+   const {data, error} = await client.storage.from(config.bucket).download(path);
+   if (error || !data) throw new Error('Foto konnte nicht geladen werden.');
+   if (current !== generation) throw new Error('Ausstellung geschlossen.');
+   while (cache.size && (cache.size >= CACHE_ITEMS || cachedBytes + data.size > CACHE_BYTES)) {
+     const oldestPath = cache.keys().next().value;
+     const oldest = cache.get(oldestPath);
+     URL.revokeObjectURL(oldest.url);
+     cachedBytes -= oldest.bytes;
+     cache.delete(oldestPath);
+   }
+   const url = URL.createObjectURL(data);
+   cache.set(path, {url, bytes: data.size});
+   cachedBytes += data.size;
+   return url;
+ })();
+ pending.set(path, task);
+ try {
+   return await task;
+ } finally {
+   if (pending.get(path) === task) pending.delete(path);
+ }
 }
-export function releaseMemories(){generation++;cache.forEach(url=>URL.revokeObjectURL(url));cache.clear();pending.clear();}
+
+export function releaseMemories() {
+ generation++;
+ cache.forEach(entry => URL.revokeObjectURL(entry.url));
+ cache.clear();
+ cachedBytes = 0;
+ pending.clear();
+}

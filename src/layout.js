@@ -19,12 +19,12 @@ export function layout(count) {
   return {length, pairs, slots};
 }
 
-export function nearbyFrames({pairs, slots}, z) {
-  const firstBay = Math.max(0, Math.ceil((FIRST_BAY_Z - z - FRAME_RADIUS) / BAY_SPACING));
-  const lastBay = Math.min(pairs - 1, Math.floor((FIRST_BAY_Z - z + FRAME_RADIUS) / BAY_SPACING));
+export function nearbyFrames({pairs, slots}, z, radius = FRAME_RADIUS) {
+  const firstBay = Math.max(0, Math.ceil((FIRST_BAY_Z - z - radius) / BAY_SPACING));
+  const lastBay = Math.min(pairs - 1, Math.floor((FIRST_BAY_Z - z + radius) / BAY_SPACING));
   const indices = [];
   for (let bay = firstBay; bay <= lastBay; bay++) indices.push(bay * 2, bay * 2 + 1);
-  if (slots.length > pairs * 2 && Math.abs(slots.at(-1).z - z) <= FRAME_RADIUS) {
+  if (slots.length > pairs * 2 && Math.abs(slots.at(-1).z - z) <= radius) {
     indices.push(pairs * 2);
   }
   return indices.sort((a, b) => Math.abs(slots[a].z - z) - Math.abs(slots[b].z - z));

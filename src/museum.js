@@ -4,12 +4,19 @@ import {constrain, GALLERY_BACK, GALLERY_WIDTH, layout, nearbyFrames} from './la
 import {getPhoto} from './data';
 import {isInteractiveTarget} from './keyboard';
 import {createAvatar} from './avatar';
+
+const PRELOAD_RADIUS = 86;
+const MAX_PHOTO_LOADS = 6;
+const MAX_BACKGROUND_LOADS = 4;
+
 export function createMuseum(host,rows,onSelect,onPlace,editor={}){
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;host.append(renderer.domElement);renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Louvre Museum: WASD zum Laufen, ziehen zum Umschauen');
  const camera=new T.PerspectiveCamera(67,1,.1,240),groups=catalog(rows,editor.structure),clock=new T.Clock(),player=new T.Vector3();let scene,avatar=null,resources=[],portals=[],pictures=[],zone={type:'outside'},yaw=0,pitch=.18,paused=false,disposed=false,frame,drag,joy={x:0,y:0},cooldown=0,nearest=null,cameraMode='third',avatarVisible=true;const keys=new Set(),ac=new AbortController();
  const frames = new Map();
+ const requestedPhotos = new Set();
  const textureLoader = new T.TextureLoader();
  let exhibitionLayout = null, gallerySlots = [], streamedZ = null, activeLoads = 0;
+ let preloadWindow = [], backgroundLoads = 0;
  const options={signal:ac.signal},ray=new T.Raycaster();let bounds={x:60,z:50};
  function mat(color,extra={},owned=resources){const m=new T.MeshStandardMaterial({color,roughness:.75,...extra});owned.push(m);return m;}
  function addAvatar(){avatar=createAvatar();avatar.position.copy(player);avatar.rotation.y=yaw+Math.PI;avatar.visible=cameraMode==='third'&&avatarVisible;scene.add(avatar);}
@@ -100,6 +107,7 @@ export function createMuseum(host,rows,onSelect,onPlace,editor={}){
 
  async function loadFramePhoto(position, entry) {
    entry.queued = false;
+   requestedPhotos.add(position);
    activeLoads++;
    const isCurrent = () => frames.get(position) === entry;
    let texture;
@@ -131,16 +139,36 @@ export function createMuseum(host,rows,onSelect,onPlace,editor={}){
    } finally {
      texture?.dispose();
      activeLoads--;
-     loadNearbyPhotos();
+     schedulePhotos();
    }
  }
 
- function loadNearbyPhotos() {
+ async function preloadPhoto(position, row) {
+   requestedPhotos.add(position);
+   backgroundLoads++;
+   try {
+     await getPhoto(row);
+   } catch {
+     // The frame will try again when it enters view.
+   } finally {
+     backgroundLoads--;
+     schedulePhotos();
+   }
+ }
+
+ function schedulePhotos() {
    if (!exhibitionLayout || disposed) return;
    for (const position of nearbyFrames(exhibitionLayout, player.z)) {
-     if (activeLoads >= 2) break;
+     if (activeLoads + backgroundLoads >= MAX_PHOTO_LOADS) return;
      const entry = frames.get(position);
      if (entry?.queued) void loadFramePhoto(position, entry);
+   }
+   if (paused) return;
+   for (const position of preloadWindow) {
+     if (activeLoads + backgroundLoads >= MAX_PHOTO_LOADS || backgroundLoads >= MAX_BACKGROUND_LOADS) return;
+     if (requestedPhotos.has(position)) continue;
+     const row = rows[gallerySlots[position].index];
+     if (row.image_path) void preloadPhoto(position, row);
    }
  }
 
@@ -148,6 +176,11 @@ export function createMuseum(host,rows,onSelect,onPlace,editor={}){
    if (!exhibitionLayout || (streamedZ !== null && Math.abs(player.z - streamedZ) < .5)) return;
    streamedZ = player.z;
    const nearby = new Set(nearbyFrames(exhibitionLayout, player.z));
+   preloadWindow = nearbyFrames(exhibitionLayout, player.z, PRELOAD_RADIUS);
+   const retained = new Set(preloadWindow);
+   for (const position of requestedPhotos) {
+     if (!retained.has(position)) requestedPhotos.delete(position);
+   }
    for (const [position, entry] of frames) {
      if (!nearby.has(position)) unmountFrame(position, entry);
    }
@@ -155,13 +188,15 @@ export function createMuseum(host,rows,onSelect,onPlace,editor={}){
      if (!frames.has(position)) frames.set(position, mountFrame(position));
    }
    pictures = [...frames.values()].map(entry => entry.art);
-   loadNearbyPhotos();
+   schedulePhotos();
  }
 
  function clearFrames() {
    for (const [position, entry] of frames) unmountFrame(position, entry);
    exhibitionLayout = null;
    gallerySlots = [];
+   preloadWindow = [];
+   requestedPhotos.clear();
    streamedZ = null;
  }
 
@@ -200,5 +235,5 @@ export function createMuseum(host,rows,onSelect,onPlace,editor={}){
  avatar?.userData.update?.(dt,movementSpeed);
  renderer.render(scene,camera);frame=requestAnimationFrame(tick);}
  frame=requestAnimationFrame(tick);
- return {setJoystick(x,y){joy={x,y};},toggleCamera(){cameraMode=cameraMode==='third'?'pov':'third';pitch=cameraMode==='third'?.18:0;if(avatar)avatar.visible=cameraMode==='third'&&avatarVisible;updateCamera();return cameraMode;},setAvatarVisible(v){avatarVisible=v;if(avatar)avatar.visible=cameraMode==='third'&&v;},pause(v){paused=v;reset();},home(){navigate({type:'hub'});},outside(){navigate({type:'outside'});},goQuarter(q){navigate({type:'wing',q,page:0});},goRoom(q,room,frameIndex){navigate({type:'room',q,room,frameIndex,page:Math.floor(room/8)});},dispose(){disposed=true;clearFrames();cancelAnimationFrame(frame);ac.abort();observer.disconnect();avatar?.userData.dispose?.();resources.forEach(r=>r.dispose());renderer.dispose();canvas.remove();}};
+ return {setJoystick(x,y){joy={x,y};},toggleCamera(){cameraMode=cameraMode==='third'?'pov':'third';pitch=cameraMode==='third'?.18:0;if(avatar)avatar.visible=cameraMode==='third'&&avatarVisible;updateCamera();return cameraMode;},setAvatarVisible(v){avatarVisible=v;if(avatar)avatar.visible=cameraMode==='third'&&v;},pause(v){paused=v;reset();if(!paused)schedulePhotos();},home(){navigate({type:'hub'});},outside(){navigate({type:'outside'});},goQuarter(q){navigate({type:'wing',q,page:0});},goRoom(q,room,frameIndex){navigate({type:'room',q,room,frameIndex,page:Math.floor(room/8)});},dispose(){disposed=true;clearFrames();cancelAnimationFrame(frame);ac.abort();observer.disconnect();avatar?.userData.dispose?.();resources.forEach(r=>r.dispose());renderer.dispose();canvas.remove();}};
 }
